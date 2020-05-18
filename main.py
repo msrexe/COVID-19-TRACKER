@@ -1,47 +1,34 @@
 import requests
-import re
-import urllib
-import time
+import json
 import datetime
+import time
 
-now = datetime.datetime.now()
-
-def connection(link):
+def getData(country):
     key = 0
-    while not key == 1:
+    while key != 1:
         try:
-            response = requests.get(link)
+            result = requests.get(f"https://disease.sh/v2/countries/{country}")
         except Exception:
             print("\nİnternet bağlantısı sağlanamadı!!! Tekrar deneniyor....\n")
             time.sleep(6)
         else:
-            print("Api ile bağlantı sağlandı...")
+            print("\nApi ile bağlantı sağlandı...")
             print("\nVeriler karşı taraftan alındı...\n")
             key = 1
-    reg(response.content)
-
-def reg(data):
-    confirmedcases = re.findall(r"\"confirmed_cases\":(.*?),",data.decode("utf-8"))
-    totaltests = re.findall(r"\"total_tests\":(.*?)}",data.decode("utf-8"))
-    cctoday    = re.findall(r"\"confirmed_cases_today\":(.*?),",data.decode("utf-8"))
-    deaths     = re.findall(r"\"deaths\":(.*?),",data.decode("utf-8"))
-    deathstoday= re.findall(r"\"deaths_today\":(.*?),",data.decode("utf-8"))
-    date       = re.findall(r"\"publication_date\":(.*?),",data.decode("utf-8"))  
-    recoveredpatients = re.findall(r"\"recovered_patients\":(.*?),",data.decode("utf-8"))    
-    todaytests = re.findall(r"\"tests_done_today\":(.*?),",data.decode("utf-8"))
+    result = json.loads(result.text)
     print("**************************************************************************\n\n")
-    print("Tarih                  == {}".format(date))
-    print("\nToplam Test Sayısı   == {}".format(totaltests))
-    print("\nBugünkü Test Sayısı  == {}".format(todaytests))
-    print("\nToplam Vaka Sayısı   == {}".format(confirmedcases))
-    print("\nBugünkü Vaka Sayısı  == {}".format(cctoday))
-    print("\nToplam Ölüm Sayısı   == {}".format(deaths))
-    print("\nBugünkü Ölüm Sayısı  == {}".format(deathstoday))
-    print("\nİyileşen Vaka Sayısı == {}".format(recoveredpatients))
-    print(f"\nSon Güncelleme      == {now}")
+    print(f"Toplam Vaka                  = {result['cases']}")
+    print(f"Bugünkü Vaka                 = {result['todayCases']}")
+    print(f"Aktif Vaka                   = {result['active']}")
+    print(f"Toplam Ölüm                  = {result['deaths']}")
+    print(f"Bugünkü Ölüm                 = {result['todayDeaths']}")
+    print(f"Toplam İyileşen              = {result['recovered']}")
+    print(f"Yoğun Bakımsaki Hasta Sayısı = {result['critical']}")
+    print(f"Toplam test                  = {result['tests']}\n")
+    print(f"\nSon Güncelleme      == {datetime.datetime.now()}")
     print("\n\n**************************************************************************\n")
-
-print("\n\nTÜRKİYE GÜNLÜK KORONAVİRÜS TABLOSU\n")
-connection("http://covid19gunlukleri.com/api/")
-print("Veriler anlık olarak https://covid19.saglik.gov.tr/ üzerinden güncellenmektedir.\nmsrexe")
-time.sleep(60)
+    print("Veriler anlık olarak https://covid19.saglik.gov.tr/ üzerinden güncellenmektedir.\ngithub.com/msrexe")
+print("\t\t\t\tCOVID-19 Tracker")
+c = input("\nÜlke girin (Ör:Turkey,USA) : ")
+getData(c)
+time.sleep(45)
